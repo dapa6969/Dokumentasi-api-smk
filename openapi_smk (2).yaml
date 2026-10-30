@@ -1,0 +1,6381 @@
+openapi: 3.0.3
+info:
+  title: SMK School Management API
+  version: 0.3.0-draft
+  description: 'DRAFT API contract for Odoo 19 Community + Vue.js. Endpoints are proposals, not deployed services. Role names are logical permissions; mapping to Odoo groups must be agreed. Authentication uses Odoo session cookie as proposed baseline, subject to team approval. All authorization enforced by Odoo.
+
+    OpenAPI source of truth for team review; includes Excel student import.'
+servers:
+- url: http://localhost:8069
+  description: Odoo local (example only)
+tags:
+- name: Auth
+- name: Accounts
+- name: Academy
+- name: Attendance
+- name: Library
+- name: Cooperative
+- name: Canteen
+paths:
+  /api/v1/auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Login using Odoo-backed authentication
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_auth_login
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+  /api/v1/auth/logout:
+    post:
+      tags:
+      - Auth
+      summary: Logout current session
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_auth_logout
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+  /api/v1/auth/me:
+    get:
+      tags:
+      - Auth
+      summary: Current user and roles
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_auth_me
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+  /api/v1/accounts:
+    get:
+      tags:
+      - Accounts
+      summary: List accounts (restricted)
+      description: 'Allowed logical roles: system_admin. Record scope enforced by backend.'
+      operationId: get_api_v1_accounts
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/accounts/provision:
+    post:
+      tags:
+      - Accounts
+      summary: Bulk create/link accounts from Academy records
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_accounts_provision
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AccountProvisionResult'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountProvisionRequest'
+  /api/v1/accounts/{id}/deactivate:
+    post:
+      tags:
+      - Accounts
+      summary: Deactivate account
+      description: 'Allowed logical roles: system_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_accounts_id_deactivate
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/accounts/{id}/roles:
+    put:
+      tags:
+      - Accounts
+      summary: Set account roles
+      description: 'Allowed logical roles: system_admin. Record scope enforced by backend.'
+      operationId: put_api_v1_accounts_id_roles
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/User'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                    - system_admin
+                    - academic_admin
+                    - subject_teacher
+                    - homeroom_teacher
+                    - student
+                    - library_staff
+                    - cooperative_staff
+                    - canteen_staff
+              required:
+              - roles
+  /api/v1/accounts/activation-request:
+    post:
+      tags:
+      - Accounts
+      summary: Request activation link (non-enumerating response)
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_accounts_activation_request
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+              required:
+              - login
+  /api/v1/accounts/password-reset-request:
+    post:
+      tags:
+      - Accounts
+      summary: Request password reset (non-enumerating response)
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_accounts_password_reset_request
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+              required:
+              - login
+  /api/v1/academy/students:
+    get:
+      tags:
+      - Academy
+      summary: List students
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_students
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Student'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create Student
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_students
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Student'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+  /api/v1/academy/students/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get Student
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_students_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Student'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update Student
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_students_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Student'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Student'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete Student
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_students_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/teachers:
+    get:
+      tags:
+      - Academy
+      summary: List teachers
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_teachers
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Teacher'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create Teacher
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_teachers
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Teacher'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Teacher'
+  /api/v1/academy/teachers/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get Teacher
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_teachers_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Teacher'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update Teacher
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_teachers_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Teacher'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Teacher'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete Teacher
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_teachers_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/majors:
+    get:
+      tags:
+      - Academy
+      summary: List majors
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_majors
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Major'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create Major
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_majors
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Major'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Major'
+  /api/v1/academy/majors/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get Major
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_majors_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Major'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update Major
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_majors_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Major'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Major'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete Major
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_majors_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/classes:
+    get:
+      tags:
+      - Academy
+      summary: List classes
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_classes
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Classroom'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create Classroom
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_classes
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Classroom'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Classroom'
+  /api/v1/academy/classes/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get Classroom
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_classes_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Classroom'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update Classroom
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_classes_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Classroom'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Classroom'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete Classroom
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_classes_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/academic-years:
+    get:
+      tags:
+      - Academy
+      summary: List academic-years
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_academic_years
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AcademicYear'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create AcademicYear
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_academic_years
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AcademicYear'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcademicYear'
+  /api/v1/academy/academic-years/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get AcademicYear
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_academic_years_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AcademicYear'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update AcademicYear
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_academic_years_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AcademicYear'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcademicYear'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete AcademicYear
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_academic_years_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/semesters:
+    get:
+      tags:
+      - Academy
+      summary: List semesters
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_semesters
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Semester'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create Semester
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_semesters
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Semester'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Semester'
+  /api/v1/academy/semesters/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get Semester
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_semesters_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Semester'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update Semester
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_semesters_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Semester'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Semester'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete Semester
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_semesters_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/subjects:
+    get:
+      tags:
+      - Academy
+      summary: List subjects
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_subjects
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subject'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create Subject
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_subjects
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Subject'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subject'
+  /api/v1/academy/subjects/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get Subject
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_subjects_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Subject'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update Subject
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_subjects_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Subject'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subject'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete Subject
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_subjects_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/teaching-assignments:
+    get:
+      tags:
+      - Academy
+      summary: List teaching-assignments
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_teaching_assignments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeachingAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create TeachingAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_teaching_assignments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TeachingAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeachingAssignment'
+  /api/v1/academy/teaching-assignments/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get TeachingAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_teaching_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TeachingAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update TeachingAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_teaching_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/TeachingAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeachingAssignment'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete TeachingAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_teaching_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/homeroom-assignments:
+    get:
+      tags:
+      - Academy
+      summary: List homeroom-assignments
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_homeroom_assignments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HomeroomAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Academy
+      summary: Create HomeroomAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_homeroom_assignments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/HomeroomAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeroomAssignment'
+  /api/v1/academy/homeroom-assignments/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get HomeroomAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_homeroom_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/HomeroomAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Academy
+      summary: Update HomeroomAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_homeroom_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/HomeroomAssignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HomeroomAssignment'
+    delete:
+      tags:
+      - Academy
+      summary: Archive/delete HomeroomAssignment
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: delete_api_v1_academy_homeroom_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/students/imports/preview:
+    post:
+      tags:
+      - Academy
+      summary: Validate student Excel and preview errors
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_students_imports_preview
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ImportPreview'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                mode:
+                  type: string
+                  enum:
+                  - create_only
+                  - upsert
+                  default: create_only
+              required:
+              - file
+  /api/v1/academy/students/imports/{id}/commit:
+    post:
+      tags:
+      - Academy
+      summary: Commit previously validated student import
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_students_imports_id_commit
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ImportCommitResult'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                valid_rows_only:
+                  type: boolean
+                  default: false
+              required: []
+  /api/v1/academy/students/imports/{id}:
+    get:
+      tags:
+      - Academy
+      summary: Get import validation/status
+      description: 'Allowed logical roles: system_admin, academic_admin. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_students_imports_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/ImportPreview'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/academy/assignments:
+    get:
+      tags:
+      - Academy
+      summary: List teacher assignments / student tasks
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_assignments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+    post:
+      tags:
+      - Academy
+      summary: Create assignment
+      description: 'Allowed logical roles: subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_assignments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Assignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+  /api/v1/academy/assignments/{id}:
+    patch:
+      tags:
+      - Academy
+      summary: Update assignment
+      description: 'Allowed logical roles: subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_assignments_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Assignment'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Assignment'
+  /api/v1/academy/grades:
+    get:
+      tags:
+      - Academy
+      summary: List authorized grades
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_grades
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Grade'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+    post:
+      tags:
+      - Academy
+      summary: Record grade
+      description: 'Allowed logical roles: subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_grades
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Grade'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Grade'
+  /api/v1/academy/grades/{id}:
+    patch:
+      tags:
+      - Academy
+      summary: Update owned grade
+      description: 'Allowed logical roles: subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: patch_api_v1_academy_grades_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Grade'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Grade'
+  /api/v1/academy/report-cards:
+    get:
+      tags:
+      - Academy
+      summary: View authorized report cards
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_academy_report_cards
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReportCard'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+  /api/v1/academy/report-cards/{id}/publish:
+    post:
+      tags:
+      - Academy
+      summary: Publish reviewed report card
+      description: 'Allowed logical roles: system_admin, academic_admin, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_academy_report_cards_id_publish
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/attendance/sessions:
+    get:
+      tags:
+      - Attendance
+      summary: List attendance sessions
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_attendance_sessions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AttendanceSession'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: class_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: date
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Attendance
+      summary: Open attendance session
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_attendance_sessions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AttendanceSession'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceSession'
+  /api/v1/attendance/sessions/{id}:
+    get:
+      tags:
+      - Attendance
+      summary: Get session
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_attendance_sessions_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AttendanceSession'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/attendance/sessions/{id}/close:
+    post:
+      tags:
+      - Attendance
+      summary: Close session
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_attendance_sessions_id_close
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/attendance/records:
+    get:
+      tags:
+      - Attendance
+      summary: List attendance records
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_attendance_records
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AttendanceRecord'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: student_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: session_id
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/attendance/records/bulk:
+    post:
+      tags:
+      - Attendance
+      summary: Save attendance for session
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_attendance_records_bulk
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AttendanceRecord'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: integer
+                  format: int64
+                records:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/AttendanceRecord'
+              required:
+              - session_id
+              - records
+  /api/v1/attendance/records/{id}:
+    patch:
+      tags:
+      - Attendance
+      summary: Correct authorized attendance record
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: patch_api_v1_attendance_records_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/AttendanceRecord'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceRecord'
+  /api/v1/attendance/summary:
+    get:
+      tags:
+      - Attendance
+      summary: Attendance summary scoped by user
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student. Record scope enforced by backend.'
+      operationId: get_api_v1_attendance_summary
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      present:
+                        type: integer
+                        format: int64
+                      sick:
+                        type: integer
+                        format: int64
+                      excused:
+                        type: integer
+                        format: int64
+                      absent:
+                        type: integer
+                        format: int64
+                      late:
+                        type: integer
+                        format: int64
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: student_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: class_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/library/books:
+    get:
+      tags:
+      - Library
+      summary: Search catalog
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_library_books
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Book'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: available
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Library
+      summary: Add book
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_library_books
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Book'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+  /api/v1/library/books/{id}:
+    get:
+      tags:
+      - Library
+      summary: Book detail
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_library_books_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Book'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Library
+      summary: Update book
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: patch_api_v1_library_books_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Book'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+    delete:
+      tags:
+      - Library
+      summary: Archive book
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: delete_api_v1_library_books_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/library/loans:
+    get:
+      tags:
+      - Library
+      summary: List loans with role scope
+      description: 'Allowed logical roles: system_admin, library_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_library_loans
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Loan'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+    post:
+      tags:
+      - Library
+      summary: Request loan
+      description: 'Allowed logical roles: student, subject_teacher, homeroom_teacher, library_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_library_loans
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Loan'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                book_id:
+                  type: integer
+                  format: int64
+              required:
+              - book_id
+  /api/v1/library/loans/{id}/approve:
+    post:
+      tags:
+      - Library
+      summary: Approve loan
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_library_loans_id_approve
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/library/loans/{id}/reject:
+    post:
+      tags:
+      - Library
+      summary: Reject loan
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_library_loans_id_reject
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/library/loans/{id}/checkout:
+    post:
+      tags:
+      - Library
+      summary: Checkout loan
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_library_loans_id_checkout
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/library/loans/{id}/return:
+    post:
+      tags:
+      - Library
+      summary: Return loan
+      description: 'Allowed logical roles: system_admin, library_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_library_loans_id_return
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/cooperative/products:
+    get:
+      tags:
+      - Cooperative
+      summary: List products
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_cooperative_products
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Cooperative
+      summary: Create product
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_cooperative_products
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+  /api/v1/cooperative/products/{id}:
+    get:
+      tags:
+      - Cooperative
+      summary: Get product
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_cooperative_products_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Cooperative
+      summary: Update product
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: patch_api_v1_cooperative_products_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+    delete:
+      tags:
+      - Cooperative
+      summary: Archive product
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: delete_api_v1_cooperative_products_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/cooperative/transactions:
+    get:
+      tags:
+      - Cooperative
+      summary: List transactions scoped by role
+      description: 'Allowed logical roles: system_admin, cooperative_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_cooperative_transactions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Cooperative
+      summary: Create transaction
+      description: 'Allowed logical roles: system_admin, cooperative_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_cooperative_transactions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TransactionItem'
+              required:
+              - items
+  /api/v1/cooperative/transactions/{id}:
+    get:
+      tags:
+      - Cooperative
+      summary: Transaction detail
+      description: 'Allowed logical roles: system_admin, cooperative_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_cooperative_transactions_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/cooperative/transactions/{id}/confirm:
+    post:
+      tags:
+      - Cooperative
+      summary: Confirm transaction
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_cooperative_transactions_id_confirm
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/cooperative/transactions/{id}/pay:
+    post:
+      tags:
+      - Cooperative
+      summary: Pay transaction
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_cooperative_transactions_id_pay
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/cooperative/transactions/{id}/cancel:
+    post:
+      tags:
+      - Cooperative
+      summary: Cancel transaction
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_cooperative_transactions_id_cancel
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/cooperative/stock-adjustments:
+    post:
+      tags:
+      - Cooperative
+      summary: Adjust stock with audit trail
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_cooperative_stock_adjustments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  format: int64
+                delta:
+                  type: number
+                reason:
+                  type: string
+              required:
+              - product_id
+              - delta
+              - reason
+  /api/v1/cooperative/reports/sales:
+    get:
+      tags:
+      - Cooperative
+      summary: Sales report
+      description: 'Allowed logical roles: system_admin, cooperative_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_cooperative_reports_sales
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      total_sales:
+                        type: number
+                      transaction_count:
+                        type: integer
+                        format: int64
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/v1/canteen/products:
+    get:
+      tags:
+      - Canteen
+      summary: List products
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_canteen_products
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Canteen
+      summary: Create product
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_canteen_products
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+  /api/v1/canteen/products/{id}:
+    get:
+      tags:
+      - Canteen
+      summary: Get product
+      description: 'Allowed logical roles: system_admin, academic_admin, subject_teacher, homeroom_teacher, student, library_staff, cooperative_staff, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_canteen_products_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+    patch:
+      tags:
+      - Canteen
+      summary: Update product
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: patch_api_v1_canteen_products_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+    delete:
+      tags:
+      - Canteen
+      summary: Archive product
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: delete_api_v1_canteen_products_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/canteen/transactions:
+    get:
+      tags:
+      - Canteen
+      summary: List transactions scoped by role
+      description: 'Allowed logical roles: system_admin, canteen_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_canteen_transactions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+    post:
+      tags:
+      - Canteen
+      summary: Create transaction
+      description: 'Allowed logical roles: system_admin, canteen_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: post_api_v1_canteen_transactions
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TransactionItem'
+              required:
+              - items
+  /api/v1/canteen/transactions/{id}:
+    get:
+      tags:
+      - Canteen
+      summary: Transaction detail
+      description: 'Allowed logical roles: system_admin, canteen_staff, student, subject_teacher, homeroom_teacher. Record scope enforced by backend.'
+      operationId: get_api_v1_canteen_transactions_id
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/canteen/transactions/{id}/confirm:
+    post:
+      tags:
+      - Canteen
+      summary: Confirm transaction
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_canteen_transactions_id_confirm
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/canteen/transactions/{id}/pay:
+    post:
+      tags:
+      - Canteen
+      summary: Pay transaction
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_canteen_transactions_id_pay
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/canteen/transactions/{id}/cancel:
+    post:
+      tags:
+      - Canteen
+      summary: Cancel transaction
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_canteen_transactions_id_cancel
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Record ID
+  /api/v1/canteen/stock-adjustments:
+    post:
+      tags:
+      - Canteen
+      summary: Adjust stock with audit trail
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: post_api_v1_canteen_stock_adjustments
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+                  format: int64
+                delta:
+                  type: number
+                reason:
+                  type: string
+              required:
+              - product_id
+              - delta
+              - reason
+  /api/v1/canteen/reports/sales:
+    get:
+      tags:
+      - Canteen
+      summary: Sales report
+      description: 'Allowed logical roles: system_admin, canteen_staff. Record scope enforced by backend.'
+      operationId: get_api_v1_canteen_reports_sales
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      total_sales:
+                        type: number
+                      transaction_count:
+                        type: integer
+                        format: int64
+                    required: []
+                required:
+                - success
+                - data
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Not authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '409':
+          description: Conflict
+        '422':
+          description: Validation error
+      security:
+      - odooSession: []
+      parameters:
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+components:
+  securitySchemes:
+    odooSession:
+      type: apiKey
+      in: cookie
+      name: session_id
+      description: Proposed Odoo session; never expose cookie to JavaScript. Confirm CSRF and CORS strategy.
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+          required: []
+      required:
+      - success
+      - error
+    PageMeta:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int64
+        per_page:
+          type: integer
+          format: int64
+        total:
+          type: integer
+          format: int64
+        total_pages:
+          type: integer
+          format: int64
+      required: []
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        login:
+          type: string
+        name:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum:
+            - system_admin
+            - academic_admin
+            - subject_teacher
+            - homeroom_teacher
+            - student
+            - library_staff
+            - cooperative_staff
+            - canteen_staff
+        active:
+          type: boolean
+        student_id:
+          type: integer
+          format: int64
+        teacher_id:
+          type: integer
+          format: int64
+      required:
+      - id
+      - login
+      - name
+      - roles
+      - active
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nis:
+          type: string
+        nisn:
+          type: string
+        name:
+          type: string
+        class_id:
+          type: integer
+          format: int64
+        major_id:
+          type: integer
+          format: int64
+        academic_year_id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - active
+          - graduated
+          - transferred
+          - inactive
+      required:
+      - id
+      - nis
+      - name
+      - status
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        employee_number:
+          type: string
+        name:
+          type: string
+        user_id:
+          type: integer
+          format: int64
+        active:
+          type: boolean
+      required:
+      - id
+      - name
+    Major:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - code
+      - name
+    Classroom:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        grade:
+          type: integer
+          enum:
+          - 10
+          - 11
+          - 12
+        major_id:
+          type: integer
+          format: int64
+        academic_year_id:
+          type: integer
+          format: int64
+        homeroom_teacher_id:
+          type: integer
+          format: int64
+      required:
+      - id
+      - name
+      - grade
+      - major_id
+    AcademicYear:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        active:
+          type: boolean
+      required:
+      - id
+      - name
+    Semester:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        academic_year_id:
+          type: integer
+          format: int64
+        sequence:
+          type: integer
+          enum:
+          - 1
+          - 2
+      required:
+      - id
+      - name
+    Subject:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - name
+    TeachingAssignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        teacher_id:
+          type: integer
+          format: int64
+        class_id:
+          type: integer
+          format: int64
+        subject_id:
+          type: integer
+          format: int64
+        academic_year_id:
+          type: integer
+          format: int64
+        semester_id:
+          type: integer
+          format: int64
+      required:
+      - id
+      - teacher_id
+      - class_id
+      - subject_id
+    HomeroomAssignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        teacher_id:
+          type: integer
+          format: int64
+        class_id:
+          type: integer
+          format: int64
+        academic_year_id:
+          type: integer
+          format: int64
+      required:
+      - id
+      - teacher_id
+      - class_id
+      - academic_year_id
+    AttendanceSession:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        class_id:
+          type: integer
+          format: int64
+        subject_id:
+          type: integer
+          format: int64
+        teacher_id:
+          type: integer
+          format: int64
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+          - draft
+          - open
+          - closed
+      required:
+      - id
+      - class_id
+      - date
+    AttendanceRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        session_id:
+          type: integer
+          format: int64
+        student_id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - present
+          - sick
+          - excused
+          - absent
+          - late
+        note:
+          type: string
+      required:
+      - id
+      - session_id
+      - student_id
+      - status
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        isbn:
+          type: string
+        title:
+          type: string
+        author:
+          type: string
+        category:
+          type: string
+        total_copies:
+          type: integer
+          format: int64
+        available_copies:
+          type: integer
+          format: int64
+      required:
+      - id
+      - title
+    Loan:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        book_id:
+          type: integer
+          format: int64
+        student_id:
+          type: integer
+          format: int64
+        borrower_user_id:
+          type: integer
+          format: int64
+        borrowed_at:
+          type: string
+          format: date-time
+        due_at:
+          type: string
+          format: date-time
+        returned_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum:
+          - requested
+          - approved
+          - borrowed
+          - returned
+          - overdue
+          - rejected
+      required:
+      - id
+      - book_id
+      - status
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        sku:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: double
+          minimum: 0
+        stock_qty:
+          type: number
+          minimum: 0
+        active:
+          type: boolean
+      required:
+      - id
+      - name
+      - price
+    TransactionItem:
+      type: object
+      properties:
+        product_id:
+          type: integer
+          format: int64
+        quantity:
+          type: number
+          minimum: 0.001
+        unit_price:
+          type: number
+          minimum: 0
+      required:
+      - product_id
+      - quantity
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        customer_user_id:
+          type: integer
+          format: int64
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionItem'
+        total:
+          type: number
+        status:
+          type: string
+          enum:
+          - draft
+          - confirmed
+          - paid
+          - cancelled
+          - refunded
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - items
+      - total
+      - status
+    ImportPreview:
+      type: object
+      properties:
+        import_id:
+          type: string
+        filename:
+          type: string
+        total_rows:
+          type: integer
+          format: int64
+        valid_rows:
+          type: integer
+          format: int64
+        invalid_rows:
+          type: integer
+          format: int64
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              row:
+                type: integer
+                format: int64
+              field:
+                type: string
+              message:
+                type: string
+            required: []
+      required:
+      - import_id
+      - total_rows
+      - valid_rows
+      - invalid_rows
+      - errors
+    ImportCommitResult:
+      type: object
+      properties:
+        import_id:
+          type: string
+        created:
+          type: integer
+          format: int64
+        skipped:
+          type: integer
+          format: int64
+        failed:
+          type: integer
+          format: int64
+      required:
+      - import_id
+      - created
+      - skipped
+      - failed
+    LoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+          format: password
+      required:
+      - login
+      - password
+    AccountProvisionRequest:
+      type: object
+      properties:
+        student_ids:
+          type: array
+          items:
+            type: integer
+            format: int64
+        teacher_ids:
+          type: array
+          items:
+            type: integer
+            format: int64
+        send_invites:
+          type: boolean
+          default: false
+      required: []
+    AccountProvisionResult:
+      type: object
+      properties:
+        created:
+          type: integer
+          format: int64
+        already_linked:
+          type: integer
+          format: int64
+        failed:
+          type: integer
+          format: int64
+        errors:
+          type: array
+          items:
+            type: string
+      required: []
+    Grade:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        student_id:
+          type: integer
+          format: int64
+        teaching_assignment_id:
+          type: integer
+          format: int64
+        assessment_name:
+          type: string
+        score:
+          type: number
+          minimum: 0
+          maximum: 100
+        published:
+          type: boolean
+      required:
+      - id
+      - student_id
+      - teaching_assignment_id
+      - score
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        teaching_assignment_id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - teaching_assignment_id
+      - title
+    ReportCard:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        student_id:
+          type: integer
+          format: int64
+        semester_id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum:
+          - draft
+          - reviewed
+          - published
+        notes:
+          type: string
+      required:
+      - id
+      - student_id
+      - semester_id
+      - status
