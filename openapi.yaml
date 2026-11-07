@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Dokumentasi API Sistem Manajemen SMK — Odoo 19 dan Vue.js
-  version: 1.0.0-draft
+  version: 1.0.1-draft
   description: 'DOKUMEN KONTRAK API (RANCANGAN, BELUM OTOMATIS BERJALAN).
 
 
@@ -838,13 +838,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Student'
+              $ref: '#/components/schemas/CreateStudentRequest'
       responses:
         '201':
           description: Berhasil
@@ -1000,6 +1001,7 @@ paths:
       operationId: patch_api_v1_academy_students_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -1012,7 +1014,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Student'
+              $ref: '#/components/schemas/UpdateStudentRequest'
       responses:
         '200':
           description: Berhasil
@@ -1184,13 +1186,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Teacher'
+              $ref: '#/components/schemas/CreateTeacherRequest'
       responses:
         '201':
           description: Berhasil
@@ -1345,6 +1348,7 @@ paths:
       operationId: patch_api_v1_academy_teachers_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -1357,7 +1361,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Teacher'
+              $ref: '#/components/schemas/UpdateTeacherRequest'
       responses:
         '200':
           description: Berhasil
@@ -1530,13 +1534,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Department'
+              $ref: '#/components/schemas/CreateDepartmentRequest'
       responses:
         '201':
           description: Berhasil
@@ -1692,6 +1697,7 @@ paths:
       operationId: patch_api_v1_academy_departments_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -1704,7 +1710,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Department'
+              $ref: '#/components/schemas/UpdateDepartmentRequest'
       responses:
         '200':
           description: Berhasil
@@ -1877,13 +1883,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Classroom'
+              $ref: '#/components/schemas/CreateClassroomRequest'
       responses:
         '201':
           description: Berhasil
@@ -2039,6 +2046,7 @@ paths:
       operationId: patch_api_v1_academy_classes_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -2051,7 +2059,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Classroom'
+              $ref: '#/components/schemas/UpdateClassroomRequest'
       responses:
         '200':
           description: Berhasil
@@ -2224,13 +2232,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AcademicYear'
+              $ref: '#/components/schemas/CreateAcademicYearRequest'
       responses:
         '201':
           description: Berhasil
@@ -2386,6 +2395,7 @@ paths:
       operationId: patch_api_v1_academy_academic_years_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -2398,7 +2408,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AcademicYear'
+              $ref: '#/components/schemas/UpdateAcademicYearRequest'
       responses:
         '200':
           description: Berhasil
@@ -2571,13 +2581,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Semester'
+              $ref: '#/components/schemas/CreateSemesterRequest'
       responses:
         '201':
           description: Berhasil
@@ -2733,6 +2744,7 @@ paths:
       operationId: patch_api_v1_academy_semesters_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -2745,7 +2757,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Semester'
+              $ref: '#/components/schemas/UpdateSemesterRequest'
       responses:
         '200':
           description: Berhasil
@@ -2918,13 +2930,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subject'
+              $ref: '#/components/schemas/CreateSubjectRequest'
       responses:
         '201':
           description: Berhasil
@@ -3080,6 +3093,7 @@ paths:
       operationId: patch_api_v1_academy_subjects_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -3092,7 +3106,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subject'
+              $ref: '#/components/schemas/UpdateSubjectRequest'
       responses:
         '200':
           description: Berhasil
@@ -3264,13 +3278,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TeachingAssignment'
+              $ref: '#/components/schemas/CreateTeachingAssignmentRequest'
       responses:
         '201':
           description: Berhasil
@@ -3425,6 +3440,7 @@ paths:
       operationId: patch_api_v1_academy_teaching_assignments_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -3437,7 +3453,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TeachingAssignment'
+              $ref: '#/components/schemas/UpdateTeachingAssignmentRequest'
       responses:
         '200':
           description: Berhasil
@@ -3609,13 +3625,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/HomeroomAssignment'
+              $ref: '#/components/schemas/CreateHomeroomAssignmentRequest'
       responses:
         '201':
           description: Berhasil
@@ -3770,6 +3787,7 @@ paths:
       operationId: patch_api_v1_academy_homeroom_assignments_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -3782,7 +3800,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/HomeroomAssignment'
+              $ref: '#/components/schemas/UpdateHomeroomAssignmentRequest'
       responses:
         '200':
           description: Berhasil
@@ -3954,13 +3972,14 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClassEnrollment'
+              $ref: '#/components/schemas/CreateClassEnrollmentRequest'
       responses:
         '201':
           description: Berhasil
@@ -4115,6 +4134,7 @@ paths:
       operationId: patch_api_v1_academy_class_enrollments_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -4127,7 +4147,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClassEnrollment'
+              $ref: '#/components/schemas/UpdateClassEnrollmentRequest'
       responses:
         '200':
           description: Berhasil
@@ -4300,6 +4320,7 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       - subject_teacher
       - homeroom_teacher
@@ -4308,7 +4329,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Assignment'
+              $ref: '#/components/schemas/CreateAssignmentRequest'
       responses:
         '201':
           description: Berhasil
@@ -4464,6 +4485,7 @@ paths:
       operationId: patch_api_v1_academy_assignments_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       - subject_teacher
       - homeroom_teacher
@@ -4478,7 +4500,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Assignment'
+              $ref: '#/components/schemas/UpdateAssignmentRequest'
       responses:
         '200':
           description: Berhasil
@@ -4651,6 +4673,7 @@ paths:
       description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
         atau menolak ID dan field hasil perhitungan.
       x-roles:
+      - system_admin
       - academic_admin
       - subject_teacher
       - homeroom_teacher
@@ -4659,7 +4682,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Grade'
+              $ref: '#/components/schemas/CreateGradeRequest'
       responses:
         '201':
           description: Berhasil
@@ -4815,6 +4838,7 @@ paths:
       operationId: patch_api_v1_academy_grades_id
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       - subject_teacher
       - homeroom_teacher
@@ -4829,7 +4853,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Grade'
+              $ref: '#/components/schemas/UpdateGradeRequest'
       responses:
         '200':
           description: Berhasil
@@ -5085,6 +5109,7 @@ paths:
       operationId: post_api_v1_academy_report_cards_id_publish
       x-phase: MVP
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: id
@@ -5164,8 +5189,10 @@ paths:
       operationId: post_api_v1_academy_students_imports_preview
       x-phase: MVP
       description: NIS/NISN harus diperlakukan sebagai teks. Periksa duplikasi dan referensi kelas. Kembalikan
-        batch_id sementara.
+        batch_id sementara. Tahun ajaran masa depan boleh dipilih; tanggal efektif penempatan mengikuti
+        awal tahun ajaran itu.
       x-roles:
+      - system_admin
       - academic_admin
       requestBody:
         required: true
@@ -5181,6 +5208,8 @@ paths:
                   type: integer
                 class_id:
                   type: integer
+                  description: Kelas default untuk seluruh baris. Jika diisi, kolom class_code
+                    boleh tidak ada; bila ada, nilainya harus sama dengan kelas default.
               required:
               - file
       responses:
@@ -5255,8 +5284,10 @@ paths:
       operationId: post_api_v1_academy_students_imports_batch_id_commit
       x-phase: MVP
       description: Lakukan validasi ulang saat penyimpanan. batch_id bersifat sementara dan hanya dapat digunakan
-        oleh admin yang mengunggahnya.
+        oleh admin yang mengunggahnya. Untuk tahun ajaran masa depan, commit hanya menyimpan biodata;
+        admin membuat dan mengaktifkan enrollment terpisah pada atau setelah tanggal efektif.
       x-roles:
+      - system_admin
       - academic_admin
       parameters:
       - name: batch_id
@@ -11581,16 +11612,19 @@ components:
       type: object
       properties:
         user_type:
+          description: Untuk staff, record_ids merujuk ke res.partner petugas sekolah terverifikasi.
           type: string
           enum:
           - student
           - teacher
           - staff
         record_ids:
+          description: ID school.student, school.teacher, atau res.partner sesuai user_type.
           type: array
           items:
             type: integer
         roles:
+          description: Staff hanya boleh mendapat role modul yang terpasang dan disetujui.
           type: array
           items:
             $ref: '#/components/schemas/Role'
@@ -11609,6 +11643,43 @@ components:
         skipped_count:
           type: integer
           example: 1
+        accounts:
+          type: array
+          description: Akun yang berhasil dibuat atau sudah tertaut. Tidak memuat kata sandi.
+          items:
+            type: object
+            properties:
+              user_id:
+                type: integer
+              owner_type:
+                type: string
+                enum:
+                - student
+                - teacher
+                - staff
+              owner_id:
+                type: integer
+              name:
+                type: string
+              login:
+                type: string
+              roles:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Role'
+              status:
+                type: string
+                enum:
+                - active
+                - inactive
+            required:
+            - user_id
+            - owner_type
+            - owner_id
+            - name
+            - login
+            - roles
+            - status
         errors:
           type: array
           items:
@@ -11621,6 +11692,7 @@ components:
       required:
       - created_count
       - skipped_count
+      - accounts
       - errors
     Department:
       type: object
@@ -11853,6 +11925,7 @@ components:
           type: integer
         semester_id:
           type: integer
+          nullable: true
         active:
           type: boolean
           example: true
@@ -12477,5 +12550,482 @@ components:
       required:
       - period_start
       - period_end
+    CreateStudentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        nis:
+          type: string
+          example: "26001"
+        nisn:
+          type: string
+          example: 98765432
+        name:
+          type: string
+          example: Andi Pratama
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+        birth_date:
+          type: string
+          format: date
+        birth_place:
+          type: string
+        status:
+          type: string
+          enum:
+            - inactive
+      required:
+        - nis
+        - name
+        - gender
+        - birth_date
+        - birth_place
+    UpdateStudentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        nis:
+          type: string
+          example: "26001"
+        nisn:
+          type: string
+          example: 98765432
+        name:
+          type: string
+          example: Andi Pratama
+        gender:
+          type: string
+          enum:
+            - male
+            - female
+        birth_date:
+          type: string
+          format: date
+        birth_place:
+          type: string
+    CreateTeacherRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: Budi Santoso
+        nip:
+          type: string
+          nullable: true
+        nuptk:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+          example: true
+      required:
+        - name
+    UpdateTeacherRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: Budi Santoso
+        nip:
+          type: string
+          nullable: true
+        nuptk:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+          example: true
+    CreateDepartmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: RPL
+        name:
+          type: string
+          example: Rekayasa Perangkat Lunak
+        active:
+          type: boolean
+          example: true
+      required:
+        - code
+        - name
+    UpdateDepartmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: RPL
+        name:
+          type: string
+          example: Rekayasa Perangkat Lunak
+        active:
+          type: boolean
+          example: true
+    CreateClassroomRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+          example: X RPL 1
+        grade_level:
+          type: string
+          enum:
+            - X
+            - XI
+            - XII
+            - XIII
+        department_id:
+          type: integer
+        academic_year_id:
+          type: integer
+        active:
+          type: boolean
+          example: true
+      required:
+        - name
+        - grade_level
+        - department_id
+        - academic_year_id
+    UpdateClassroomRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+          example: X RPL 1
+        grade_level:
+          type: string
+          enum:
+            - X
+            - XI
+            - XII
+            - XIII
+        department_id:
+          type: integer
+        academic_year_id:
+          type: integer
+        active:
+          type: boolean
+          example: true
+    CreateAcademicYearRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: 2026/2027
+        date_start:
+          type: string
+          format: date
+        date_end:
+          type: string
+          format: date
+        is_active:
+          type: boolean
+          example: true
+      required:
+        - name
+        - date_start
+        - date_end
+    UpdateAcademicYearRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          example: 2026/2027
+        date_start:
+          type: string
+          format: date
+        date_end:
+          type: string
+          format: date
+        is_active:
+          type: boolean
+          example: true
+          enum:
+            - true
+    CreateSemesterRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        academic_year_id:
+          type: integer
+        name:
+          type: string
+          enum:
+            - odd
+            - even
+        date_start:
+          type: string
+          format: date
+        date_end:
+          type: string
+          format: date
+        is_active:
+          type: boolean
+          example: true
+      required:
+        - academic_year_id
+        - name
+        - date_start
+        - date_end
+    UpdateSemesterRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        academic_year_id:
+          type: integer
+        name:
+          type: string
+          enum:
+            - odd
+            - even
+        date_start:
+          type: string
+          format: date
+        date_end:
+          type: string
+          format: date
+        is_active:
+          type: boolean
+          example: true
+          enum:
+            - true
+    CreateSubjectRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: WEB
+        name:
+          type: string
+          example: Pemrograman Web
+        active:
+          type: boolean
+          example: true
+      required:
+        - code
+        - name
+    UpdateSubjectRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        code:
+          type: string
+          example: WEB
+        name:
+          type: string
+          example: Pemrograman Web
+        active:
+          type: boolean
+          example: true
+    CreateTeachingAssignmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        teacher_id:
+          type: integer
+        subject_id:
+          type: integer
+        class_id:
+          type: integer
+        semester_id:
+          type: integer
+        academic_year_id:
+          type: integer
+      required:
+        - teacher_id
+        - subject_id
+        - class_id
+        - semester_id
+    UpdateTeachingAssignmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        teacher_id:
+          type: integer
+        subject_id:
+          type: integer
+        class_id:
+          type: integer
+        semester_id:
+          type: integer
+        academic_year_id:
+          type: integer
+    CreateHomeroomAssignmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        teacher_id:
+          type: integer
+        class_id:
+          type: integer
+        academic_year_id:
+          type: integer
+        date_start:
+          type: string
+          format: date
+        date_end:
+          type: string
+          format: date
+      required:
+        - teacher_id
+        - class_id
+        - academic_year_id
+    UpdateHomeroomAssignmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        teacher_id:
+          type: integer
+        class_id:
+          type: integer
+        academic_year_id:
+          type: integer
+        date_start:
+          type: string
+          format: date
+        date_end:
+          type: string
+          format: date
+    CreateClassEnrollmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        student_id:
+          type: integer
+        class_id:
+          type: integer
+        academic_year_id:
+          type: integer
+        date_start:
+          type: string
+          format: date
+          description: Tanggal efektif dalam tahun ajaran; bila kosong backend memakai
+            tanggal saat ini dan dapat menolak tahun ajaran yang tidak mencakup
+            tanggal itu.
+        date_end:
+          type: string
+          format: date
+        status:
+          type: string
+          enum:
+            - active
+          description: Pembuatan API langsung mengonfirmasi penempatan; hanya active diizinkan.
+      required:
+        - student_id
+        - class_id
+        - academic_year_id
+        - status
+    UpdateClassEnrollmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        student_id:
+          type: integer
+          description: Hanya dapat diubah pada penempatan draft. Histori penempatan
+            aktif/selesai tidak boleh ditimpa.
+        class_id:
+          type: integer
+          description: Hanya dapat diubah pada penempatan draft. Histori penempatan
+            aktif/selesai tidak boleh ditimpa.
+        academic_year_id:
+          type: integer
+          description: Hanya dapat diubah pada penempatan draft. Histori penempatan
+            aktif/selesai tidak boleh ditimpa.
+        date_start:
+          type: string
+          format: date
+          description: Hanya dapat diubah pada penempatan draft. Histori penempatan
+            aktif/selesai tidak boleh ditimpa.
+        date_end:
+          type: string
+          format: date
+          description: Hanya dapat diubah pada penempatan draft. Histori penempatan
+            aktif/selesai tidak boleh ditimpa.
+        status:
+          type: string
+          enum:
+            - active
+            - completed
+            - cancelled
+          description: "Transisi bergantung state: draft ke active/cancelled; active ke
+            completed; status sama dapat dikirim ulang. Penempatan aktif tidak dapat
+            dibatalkan lewat API ini."
+    CreateAssignmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        teaching_assignment_id:
+          type: integer
+        title:
+          type: string
+          example: Tugas 1
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        published:
+          type: boolean
+          example: false
+      required:
+        - teaching_assignment_id
+        - title
+        - due_at
+    UpdateAssignmentRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        teaching_assignment_id:
+          type: integer
+        title:
+          type: string
+          example: Tugas 1
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        published:
+          type: boolean
+          example: false
+    CreateGradeRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        student_id:
+          type: integer
+        assignment_id:
+          type: integer
+        score:
+          type: number
+          example: 90
+      required:
+        - student_id
+        - assignment_id
+        - score
+    UpdateGradeRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        score:
+          type: number
+          example: 90
 security:
 - odooSession: []
