@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Dokumentasi API Sistem Manajemen SMK — Odoo 19 dan Vue.js
-  version: 1.0.1-draft
+  version: 1.1.0-draft
   description: 'DOKUMEN KONTRAK API (RANCANGAN, BELUM OTOMATIS BERJALAN).
 
 
@@ -477,11 +477,12 @@ paths:
     post:
       tags:
       - Akun Pengguna
-      summary: Buat akun dari siswa/guru
+      summary: Provisioning akun lama untuk identitas yang belum tertaut
       operationId: post_api_v1_accounts_provision
       x-phase: MVP
-      description: Pembuatan banyak akun sekaligus tanpa menyimpan kata sandi dalam teks biasa. Aktivasi dilakukan
-        melalui saluran yang aman.
+      description: Akun siswa/guru baru dibuat otomatis ketika biodata dibuat. Endpoint ini tetap tersedia
+        untuk identitas lama tanpa akun; akun yang sudah tertaut dilewati tanpa duplikasi. Login siswa
+        memakai NISN, guru memakai NIP atau NUPTK. Password awal diambil terpisah melalui slip sekali ambil.
       x-roles:
       - system_admin
       requestBody:
@@ -554,6 +555,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/accounts/{id}/credential-slip:
+    get:
+      tags: [Akun Pengguna]
+      summary: Lihat status slip kredensial tanpa password
+      operationId: get_api_v1_accounts_id_credential_slip
+      x-roles: [system_admin]
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: integer}
+      responses:
+        '200':
+          description: Status slip
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: {type: boolean}
+                  data: {$ref: '#/components/schemas/CredentialSlipStatus'}
+                required: [success, data]
+        '401': {$ref: '#/components/responses/AcademyUnauthorized'}
+        '403': {$ref: '#/components/responses/AcademyForbidden'}
+        '404': {$ref: '#/components/responses/AcademyNotFound'}
+  /api/v1/accounts/{id}/credential-slip/claim:
+    post:
+      tags: [Akun Pengguna]
+      summary: Ambil slip kredensial satu kali
+      operationId: post_api_v1_accounts_id_credential_slip_claim
+      description: Password muncul hanya pada respons ini. Pengambilan diaudit; slip kedaluwarsa setelah 24 jam dan tidak dapat diambil ulang. Gunakan cookie sesi dan CSRF Odoo.
+      x-roles: [system_admin]
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: integer}
+      responses:
+        '200':
+          description: Slip diambil; jangan simpan respons di log atau penyimpanan browser
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: {type: boolean}
+                  data: {$ref: '#/components/schemas/CredentialSlipClaim'}
+                required: [success, data]
+        '400': {$ref: '#/components/responses/AcademyBadRequest'}
+        '401': {$ref: '#/components/responses/AcademyUnauthorized'}
+        '403': {$ref: '#/components/responses/AcademyForbidden'}
+        '404': {$ref: '#/components/responses/AcademyNotFound'}
+        '409': {$ref: '#/components/responses/AcademyConflict'}
+  /api/v1/accounts/{id}/credential-slip/reissue:
+    post:
+      tags: [Akun Pengguna]
+      summary: Terbitkan ulang password sementara
+      operationId: post_api_v1_accounts_id_credential_slip_reissue
+      description: Mengganti password akun aktif siswa/guru dan membatalkan slip lama secara atomik. Respons hanya memuat status slip baru. Gunakan cookie sesi dan CSRF Odoo.
+      x-roles: [system_admin]
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: integer}
+      responses:
+        '200':
+          description: Password sementara baru diterbitkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: {type: boolean}
+                  data: {$ref: '#/components/schemas/CredentialSlipStatus'}
+                required: [success, data]
+        '400': {$ref: '#/components/responses/AcademyBadRequest'}
+        '401': {$ref: '#/components/responses/AcademyUnauthorized'}
+        '403': {$ref: '#/components/responses/AcademyForbidden'}
+        '404': {$ref: '#/components/responses/AcademyNotFound'}
+        '422': {$ref: '#/components/responses/AcademyValidationError'}
   /api/v1/accounts/{id}/deactivate:
     post:
       tags:
@@ -835,8 +917,10 @@ paths:
       summary: Buat Siswa
       operationId: post_api_v1_academy_students
       x-phase: MVP
-      description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
-        atau menolak ID dan field hasil perhitungan.
+      description: Membuat biodata siswa dan akun res.users aktif secara atomik. NISN wajib unik,
+        tepat 10 digit, dan menjadi login; NIS tetap identitas akademik terpisah. Password acak
+        hanya tersedia melalui slip sekali ambil untuk system_admin. Kegagalan akun membatalkan
+        pembuatan biodata. Respons memuat user_id dan has_login_account tanpa password.
       x-roles:
       - system_admin
       - academic_admin
@@ -999,6 +1083,7 @@ paths:
       - Akademik
       summary: Perbarui Siswa
       operationId: patch_api_v1_academy_students_id
+      description: NISN yang menjadi login akun otomatis tidak dapat diganti melalui PATCH; perlu prosedur migrasi akun terotorisasi. Data lama tanpa akun tetap dapat diperbaiki menurut izin admin.
       x-phase: MVP
       x-roles:
       - system_admin
@@ -1183,8 +1268,10 @@ paths:
       summary: Buat Guru
       operationId: post_api_v1_academy_teachers
       x-phase: MVP
-      description: Isi permintaan hanya boleh memuat field yang diizinkan untuk pembuatan. Backend mengabaikan
-        atau menolak ID dan field hasil perhitungan.
+      description: Membuat biodata guru dan akun res.users aktif secara atomik. Login memakai NIP
+        unik 18 digit, atau NUPTK unik 16 digit bila NIP kosong. Keduanya kosong ditolak,
+        termasuk guru honorer yang belum memiliki salah satu identifier. Password acak hanya
+        tersedia melalui slip sekali ambil untuk system_admin. Respons tidak memuat password.
       x-roles:
       - system_admin
       - academic_admin
@@ -1346,6 +1433,7 @@ paths:
       - Akademik
       summary: Perbarui Guru
       operationId: patch_api_v1_academy_teachers_id
+      description: NIP/NUPTK yang menjadi login akun otomatis tidak dapat diganti melalui PATCH; perlu prosedur migrasi akun terotorisasi. Data lama tanpa akun tetap dapat diperbaiki menurut izin admin.
       x-phase: MVP
       x-roles:
       - system_admin
@@ -5283,7 +5371,9 @@ paths:
       summary: Simpan batch impor yang tervalidasi
       operationId: post_api_v1_academy_students_imports_batch_id_commit
       x-phase: MVP
-      description: Lakukan validasi ulang saat penyimpanan. batch_id bersifat sementara dan hanya dapat digunakan
+      description: Lakukan validasi ulang saat penyimpanan. Setiap baris memerlukan NISN unik 10 digit.
+        Akun aktif dan slip individual dibuat bersama biodata dalam transaksi atomik; hasil commit
+        tidak memuat password atau daftar slip. batch_id bersifat sementara dan hanya dapat digunakan
         oleh admin yang mengunggahnya. Untuk tahun ajaran masa depan, commit hanya menyimpan biodata;
         admin membuat dan mengaktifkan enrollment terpisah pada atau setelah tanggal efektif.
       x-roles:
@@ -11473,6 +11563,25 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       security: []
 components:
+  responses:
+    AcademyBadRequest:
+      description: Permintaan atau token CSRF tidak valid
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}
+    AcademyUnauthorized:
+      description: Sesi belum login atau berakhir
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}
+    AcademyForbidden:
+      description: Bukan administrator sistem yang berwenang
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}
+    AcademyNotFound:
+      description: Akun siswa atau guru tidak ditemukan
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}
+    AcademyConflict:
+      description: Slip sudah diambil, kedaluwarsa, diganti, atau sedang diklaim
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}
+    AcademyValidationError:
+      description: Akun tidak aktif atau bukan siswa/guru Academy
+      content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}
   securitySchemes:
     odooSession:
       type: apiKey
@@ -11608,6 +11717,33 @@ components:
       required:
       - current_password
       - new_password
+    CredentialSlipStatus:
+      type: object
+      properties:
+        user_id: {type: integer}
+        login: {type: string}
+        status:
+          type: string
+          enum: [none, available, claimed, expired, superseded]
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required: [user_id, login, status, expires_at]
+    CredentialSlipClaim:
+      type: object
+      description: Rahasia hanya muncul sekali kepada administrator sistem; jangan simpan atau log respons.
+      properties:
+        user_id: {type: integer}
+        login: {type: string}
+        password:
+          type: string
+          format: password
+          description: Password acak sekali tampil; contoh sengaja tidak diberikan.
+        status:
+          type: string
+          enum: [claimed]
+      required: [user_id, login, password, status]
     AccountProvisionRequest:
       type: object
       properties:
@@ -11631,6 +11767,7 @@ components:
         send_activation:
           type: boolean
           example: false
+          description: Kompatibilitas alur lama; false tetap menghasilkan slip individual. true dapat mengirim email reset bila alamat tersedia, tanpa mengubah kewajiban slip untuk login pertama tanpa email.
       required:
       - user_type
       - record_ids
@@ -11800,7 +11937,7 @@ components:
           example: '26001'
         nisn:
           type: string
-          example: 0098765432
+          example: '0000000123'
         name:
           type: string
           example: Andi Pratama
@@ -11832,6 +11969,10 @@ components:
         has_login_account:
           type: boolean
           example: true
+        account_status:
+          type: string
+          enum: [none, active, inactive]
+          description: Status akun login terkait; terpisah dari status akademik siswa.
       required:
       - id
       - nis
@@ -11855,6 +11996,12 @@ components:
         user_id:
           type: integer
           nullable: true
+        has_login_account:
+          type: boolean
+        account_status:
+          type: string
+          enum: [none, active, inactive]
+          description: Status akun login terkait; terpisah dari status biodata guru.
         active:
           type: boolean
           example: true
@@ -12559,7 +12706,8 @@ components:
           example: "26001"
         nisn:
           type: string
-          example: 98765432
+          pattern: '^[0-9]{10}$'
+          example: '0000000123'
         name:
           type: string
           example: Andi Pratama
@@ -12579,6 +12727,7 @@ components:
             - inactive
       required:
         - nis
+        - nisn
         - name
         - gender
         - birth_date
@@ -12616,14 +12765,17 @@ components:
         nip:
           type: string
           nullable: true
+          pattern: '^[0-9]{18}$'
         nuptk:
           type: string
           nullable: true
+          pattern: '^[0-9]{16}$'
         active:
           type: boolean
           example: true
       required:
         - name
+      description: Wajib mengisi NIP 18 digit atau NUPTK 16 digit. Jika keduanya terisi, NIP menjadi login.
     UpdateTeacherRequest:
       type: object
       additionalProperties: false
